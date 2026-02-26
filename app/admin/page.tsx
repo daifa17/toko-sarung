@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 
 async function login(formData: FormData) {
   'use server'
@@ -13,7 +14,7 @@ async function login(formData: FormData) {
 async function logout() {
   'use server'
   ;(await cookies()).delete('admin_login')
-  revalidatePath('/admin')
+  redirect('/admin')
 }
 
 async function tambahSarung(formData: FormData) {
@@ -35,8 +36,8 @@ async function tambahSarung(formData: FormData) {
   }
 
   await supabase.from('sarung').insert([{ nama, kategori, deskripsi, harga, stok, gambar_url }])
-  revalidatePath('/admin')
   revalidatePath('/')
+  redirect('/admin?pesan=tambah') // Memanggil popup tambah
 }
 
 async function updateData(formData: FormData) {
@@ -44,18 +45,22 @@ async function updateData(formData: FormData) {
   await supabase.from('sarung')
     .update({ stok: Number(formData.get('stok')), harga: Number(formData.get('harga')) })
     .eq('id', formData.get('id') as string)
-  revalidatePath('/admin')
   revalidatePath('/')
+  redirect('/admin?pesan=update') // Memanggil popup update
 }
 
 async function hapusSarung(formData: FormData) {
   'use server'
   await supabase.from('sarung').delete().eq('id', formData.get('id') as string)
-  revalidatePath('/admin')
   revalidatePath('/')
+  redirect('/admin?pesan=hapus') // Memanggil popup hapus
 }
 
-export default async function AdminPage() {
+export default async function AdminPage(props: any) {
+  // Sistem penangkap sinyal untuk memunculkan Popup
+  const searchParams = await props.searchParams;
+  const pesan = searchParams?.pesan;
+
   const cookieStore = await cookies()
   if (cookieStore.get('admin_login')?.value !== 'sukses') {
     return (
@@ -63,7 +68,8 @@ export default async function AdminPage() {
         <div className="bg-white p-8 md:p-10 rounded-2xl shadow-xl w-full max-w-sm text-center border border-slate-100">
           <h1 className="text-3xl font-extrabold mb-2 text-slate-800">Admin Area</h1>
           <form action={login} className="flex flex-col gap-4 mt-8">
-            <input type="password" name="password" placeholder="Password (bos_sarung_123)" required className="border border-slate-300 p-3 rounded-xl focus:ring-2 focus:ring-slate-800 outline-none transition" />
+            {/* TULISAN PASSWORD DI HILANGKAN DARI SINI BIAR AMAN */}
+            <input type="password" name="password" placeholder="Masukkan Kata Sandi..." required className="border border-slate-300 p-3 rounded-xl focus:ring-2 focus:ring-slate-800 outline-none transition" />
             <button type="submit" className="w-full bg-slate-800 text-white p-3 rounded-xl font-bold hover:bg-slate-900 transition">Masuk Panel</button>
           </form>
         </div>
@@ -74,7 +80,21 @@ export default async function AdminPage() {
   const { data: sarung } = await supabase.from('sarung').select('*').order('id', { ascending: false })
 
   return (
-    <main className="bg-slate-50 min-h-screen text-slate-900 font-sans pb-20">
+    <main className="bg-slate-50 min-h-screen text-slate-900 font-sans pb-20 relative">
+      
+      {/* ===== POPUP NOTIFIKASI MUNCUL DI SINI ===== */}
+      {pesan && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl z-50 flex items-center gap-4 animate-bounce border border-slate-700">
+          <div className="font-bold">
+            {pesan === 'tambah' && '🎉 Berhasil Menambahkan Produk Baru!'}
+            {pesan === 'update' && '✅ Data Produk Berhasil Diperbarui!'}
+            {pesan === 'hapus' && '🗑️ Produk Berhasil Dihapus!'}
+          </div>
+          <a href="/admin" className="bg-slate-700 hover:bg-slate-600 px-4 py-1.5 rounded-lg text-sm font-bold transition">OK</a>
+        </div>
+      )}
+      {/* =========================================== */}
+
       <nav className="bg-white border-b px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-20 shadow-sm">
         <h1 className="text-xl md:text-2xl font-black text-slate-800">Sarungku <span className="text-emerald-600">Admin</span></h1>
         <div className="flex gap-2 md:gap-4 items-center">
@@ -85,10 +105,9 @@ export default async function AdminPage() {
         </div>
       </nav>
 
-      {/* Perbaikan jarak/padding untuk HP (p-4) dan Laptop (lg:p-8) */}
       <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-8 p-4 lg:p-8">
         
-        {/* FORM TAMBAH: Menghilangkan sticky di HP, hanya sticky di Laptop (lg:sticky lg:top-24) */}
+        {/* FORM TAMBAH */}
         <div className="bg-white p-5 md:p-6 rounded-2xl border shadow-sm h-fit lg:sticky lg:top-24">
           <h2 className="text-lg md:text-xl font-bold mb-4 border-b pb-4">Tambah Produk Baru</h2>
           <form action={tambahSarung} className="flex flex-col gap-4">
