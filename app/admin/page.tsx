@@ -37,7 +37,7 @@ async function tambahSarung(formData: FormData) {
 
   await supabase.from('sarung').insert([{ nama, kategori, deskripsi, harga, stok, gambar_url }])
   revalidatePath('/')
-  redirect('/admin?pesan=tambah') // Memanggil popup tambah
+  redirect('/admin?pesan=tambah')
 }
 
 async function updateData(formData: FormData) {
@@ -46,18 +46,17 @@ async function updateData(formData: FormData) {
     .update({ stok: Number(formData.get('stok')), harga: Number(formData.get('harga')) })
     .eq('id', formData.get('id') as string)
   revalidatePath('/')
-  redirect('/admin?pesan=update') // Memanggil popup update
+  redirect('/admin?pesan=update')
 }
 
 async function hapusSarung(formData: FormData) {
   'use server'
   await supabase.from('sarung').delete().eq('id', formData.get('id') as string)
   revalidatePath('/')
-  redirect('/admin?pesan=hapus') // Memanggil popup hapus
+  redirect('/admin?pesan=hapus')
 }
 
 export default async function AdminPage(props: any) {
-  // Sistem penangkap sinyal untuk memunculkan Popup
   const searchParams = await props.searchParams;
   const pesan = searchParams?.pesan;
 
@@ -68,7 +67,6 @@ export default async function AdminPage(props: any) {
         <div className="bg-white p-8 md:p-10 rounded-2xl shadow-xl w-full max-w-sm text-center border border-slate-100">
           <h1 className="text-3xl font-extrabold mb-2 text-slate-800">Admin Area</h1>
           <form action={login} className="flex flex-col gap-4 mt-8">
-            {/* TULISAN PASSWORD DI HILANGKAN DARI SINI BIAR AMAN */}
             <input type="password" name="password" placeholder="Masukkan Kata Sandi..." required className="border border-slate-300 p-3 rounded-xl focus:ring-2 focus:ring-slate-800 outline-none transition" />
             <button type="submit" className="w-full bg-slate-800 text-white p-3 rounded-xl font-bold hover:bg-slate-900 transition">Masuk Panel</button>
           </form>
@@ -82,15 +80,23 @@ export default async function AdminPage(props: any) {
   return (
     <main className="bg-slate-50 min-h-screen text-slate-900 font-sans pb-20 relative">
       
-      {/* ===== POPUP NOTIFIKASI MUNCUL DI SINI ===== */}
+      {/* ===== MODAL VERIFIKASI (TAMPIL DI TENGAH LAYAR) ===== */}
       {pesan && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl z-50 flex items-center gap-4 animate-bounce border border-slate-700">
-          <div className="font-bold">
-            {pesan === 'tambah' && '🎉 Berhasil Menambahkan Produk Baru!'}
-            {pesan === 'update' && '✅ Data Produk Berhasil Diperbarui!'}
-            {pesan === 'hapus' && '🗑️ Produk Berhasil Dihapus!'}
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center border border-slate-100">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl ${pesan === 'hapus' ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
+              {pesan === 'hapus' ? '🗑️' : '✅'}
+            </div>
+            <h3 className="text-2xl font-black text-slate-800 mb-2">Verifikasi Sukses!</h3>
+            <p className="text-slate-600 mb-6 font-medium">
+              {pesan === 'tambah' && 'Produk baru telah berhasil ditambahkan ke katalog.'}
+              {pesan === 'update' && 'Harga dan stok produk berhasil diperbarui.'}
+              {pesan === 'hapus' && 'Produk tersebut telah dihapus dari sistem.'}
+            </p>
+            <a href="/admin" className="block w-full bg-slate-800 hover:bg-slate-900 text-white py-3 rounded-xl font-bold transition">
+              Tutup & Lanjutkan
+            </a>
           </div>
-          <a href="/admin" className="bg-slate-700 hover:bg-slate-600 px-4 py-1.5 rounded-lg text-sm font-bold transition">OK</a>
         </div>
       )}
       {/* =========================================== */}
