@@ -19,7 +19,7 @@ async function logout() {
 async function tambahSarung(formData: FormData) {
   'use server'
   const nama = formData.get('nama') as string
-  const kategori = formData.get('kategori') as string // Sekarang ini dari Dropdown
+  const kategori = formData.get('kategori') as string
   const deskripsi = formData.get('deskripsi') as string
   const harga = Number(formData.get('harga'))
   const stok = Number(formData.get('stok'))
@@ -59,8 +59,8 @@ export default async function AdminPage() {
   const cookieStore = await cookies()
   if (cookieStore.get('admin_login')?.value !== 'sukses') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
-        <div className="bg-white p-10 rounded-2xl shadow-xl w-96 text-center border border-slate-100">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-4">
+        <div className="bg-white p-8 md:p-10 rounded-2xl shadow-xl w-full max-w-sm text-center border border-slate-100">
           <h1 className="text-3xl font-extrabold mb-2 text-slate-800">Admin Area</h1>
           <form action={login} className="flex flex-col gap-4 mt-8">
             <input type="password" name="password" placeholder="Password (bos_sarung_123)" required className="border border-slate-300 p-3 rounded-xl focus:ring-2 focus:ring-slate-800 outline-none transition" />
@@ -75,28 +75,28 @@ export default async function AdminPage() {
 
   return (
     <main className="bg-slate-50 min-h-screen text-slate-900 font-sans pb-20">
-      <nav className="bg-white border-b px-8 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
-        <h1 className="text-2xl font-black text-slate-800">Sarungku <span className="text-emerald-600">Admin</span></h1>
-        <div className="flex gap-4">
-          <a href="/" className="text-slate-500 hover:text-emerald-600 font-medium py-2">Lihat Web</a>
+      <nav className="bg-white border-b px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-20 shadow-sm">
+        <h1 className="text-xl md:text-2xl font-black text-slate-800">Sarungku <span className="text-emerald-600">Admin</span></h1>
+        <div className="flex gap-2 md:gap-4 items-center">
+          <a href="/" className="text-sm md:text-base text-slate-500 hover:text-emerald-600 font-medium py-2">Lihat Web</a>
           <form action={logout}>
-            <button type="submit" className="bg-red-50 text-red-600 px-4 py-2 rounded-lg font-bold hover:bg-red-100 transition">Logout</button>
+            <button type="submit" className="bg-red-50 text-red-600 px-3 md:px-4 py-2 rounded-lg text-sm md:text-base font-bold hover:bg-red-100 transition">Logout</button>
           </form>
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-8 p-8">
+      {/* Perbaikan jarak/padding untuk HP (p-4) dan Laptop (lg:p-8) */}
+      <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-8 p-4 lg:p-8">
         
-        {/* FORM TAMBAH */}
-        <div className="bg-white p-6 rounded-2xl border shadow-sm h-fit sticky top-24">
-          <h2 className="text-xl font-bold mb-4 border-b pb-4">Tambah Produk Baru</h2>
+        {/* FORM TAMBAH: Menghilangkan sticky di HP, hanya sticky di Laptop (lg:sticky lg:top-24) */}
+        <div className="bg-white p-5 md:p-6 rounded-2xl border shadow-sm h-fit lg:sticky lg:top-24">
+          <h2 className="text-lg md:text-xl font-bold mb-4 border-b pb-4">Tambah Produk Baru</h2>
           <form action={tambahSarung} className="flex flex-col gap-4">
             <div>
               <label className="text-sm font-semibold text-slate-700">Nama Produk</label>
               <input type="text" name="nama" placeholder="Cth: Sarung Wadimor Hitam" required className="w-full border p-2.5 rounded-lg mt-1 bg-slate-50" />
             </div>
             
-            {/* INI YANG DIUBAH JADI DROPDOWN */}
             <div>
               <label className="text-sm font-semibold text-slate-700">Merk / Kategori</label>
               <select name="kategori" required className="w-full border p-2.5 rounded-lg mt-1 bg-slate-50 cursor-pointer">
@@ -117,7 +117,7 @@ export default async function AdminPage() {
                 <input type="number" name="harga" placeholder="0" required className="w-full border p-2.5 rounded-lg mt-1 bg-slate-50" />
               </div>
               <div>
-                <label className="text-sm font-semibold text-slate-700">Stok Awal</label>
+                <label className="text-sm font-semibold text-slate-700">Stok</label>
                 <input type="number" name="stok" placeholder="0" required className="w-full border p-2.5 rounded-lg mt-1 bg-slate-50" />
               </div>
             </div>
@@ -129,20 +129,20 @@ export default async function AdminPage() {
               <label className="text-sm font-semibold text-slate-700">Foto Produk</label>
               <input type="file" name="gambar" accept="image/*" required className="w-full border p-2 rounded-lg mt-1 text-sm bg-slate-50 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700" />
             </div>
-            <button type="submit" className="bg-emerald-600 text-white font-bold py-3 mt-4 rounded-xl hover:bg-emerald-700 transition">Simpan ke Katalog</button>
+            <button type="submit" className="bg-emerald-600 text-white font-bold py-3 mt-4 rounded-xl hover:bg-emerald-700 transition">Simpan Katalog</button>
           </form>
         </div>
 
         {/* LIST PRODUK (CRUD) */}
         <div className="lg:col-span-2">
-          <h2 className="text-xl font-bold mb-6">Daftar Produk ({sarung?.length})</h2>
+          <h2 className="text-lg md:text-xl font-bold mb-4 lg:mb-6">Daftar Produk ({sarung?.length})</h2>
           <div className="grid sm:grid-cols-2 gap-4">
             {sarung?.map((item) => (
               <div key={item.id} className="bg-white p-4 rounded-2xl border shadow-sm flex flex-col gap-3">
                 <div className="flex gap-4">
                   <img src={item.gambar_url || 'https://via.placeholder.com/150'} alt={item.nama} className="w-20 h-20 object-cover rounded-xl border" />
                   <div>
-                    <h3 className="font-bold text-slate-800 line-clamp-1">{item.nama}</h3>
+                    <h3 className="font-bold text-slate-800 line-clamp-2 leading-tight">{item.nama}</h3>
                     <span className="text-xs bg-slate-100 text-slate-600 font-semibold px-2 py-1 rounded-md mt-1 inline-block">{item.kategori}</span>
                   </div>
                 </div>
@@ -164,7 +164,7 @@ export default async function AdminPage() {
 
                 <form action={hapusSarung} className="mt-auto">
                   <input type="hidden" name="id" value={item.id} />
-                  <button type="submit" className="w-full text-red-500 bg-red-50 hover:bg-red-100 py-2 rounded-xl text-sm font-bold transition">Hapus Produk</button>
+                  <button type="submit" className="w-full text-red-500 bg-red-50 hover:bg-red-100 py-2 rounded-xl text-sm font-bold transition mt-2">Hapus Produk</button>
                 </form>
               </div>
             ))}

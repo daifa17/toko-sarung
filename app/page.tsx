@@ -9,7 +9,7 @@ export default function Home() {
   const [hargaAktif, setHargaAktif] = useState('Semua')
   const [loading, setLoading] = useState(true)
 
-  const nomorWA = "6281234567890"; // GANTI DENGAN NOMOR WA-MU
+  const nomorWA = "6285136527668"; // GANTI DENGAN NOMOR WA-MU
 
   useEffect(() => {
     async function fetchData() {
